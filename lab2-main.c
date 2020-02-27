@@ -51,10 +51,18 @@ int shell_exit(char **args){
   return 0;
 }
 
+int shell_runCM(char **args){
+  if(args[0] == NULL){   // empty command
+    return 1;
+  }
 
-
-
-
+  for(int i = 0; i < shell_num_builtins(); i++){
+    if(strcmp(args[0], builtin_str[i]) == 0){
+      return (*builtin_func[i])(args);
+    }
+  }
+  return shell_launch(args);
+}
 
 int main(int argc, char **argv){
   shell_loop();   // will continue running shell on a loop
@@ -74,7 +82,7 @@ void shell_loop(){
     run_args = shell_runCM(parse_args);
     
     free(line);
-    free(run_args);
+    free(parse_args);
       
   }while (run_args);
   
