@@ -25,6 +25,49 @@ void shell_loop(){
   
 }
 
+#define SHELL_RL_SIZE 1024;
+char *shell_read_line(void){
+  int lnsize = SHELL_RL_SIZE;
+  int start_pos = 0;
+  char *buffer = malloc(sizeof(char) * lnsize);
 
+  if(!buffer){
+    fprintf(stderr, "shell: allocation error");
+    exit(EXIT_FAILURE);
+  }
+
+  int c;
+  while(1){
+    c = getchar();
+
+    if(c == EOF || c == '\n'){
+      buffer[start_pos] = '\0';
+      return buffer;
+    }
+    else{
+      buffer[start_pos] = c;
+    }
+    
+    start_pos++;
+
+    if(start_pos >= lnsize){
+      lnsize += SHELL_RL_SIZE;
+      buffer = realloc(buffer, lnsize);
+      
+      if(!buffer){
+	fprintf(stderr, "shell: allocation error");
+	exit(EXIT_FAILURE);
+      }
+    }
+    
+  }
+}
+
+
+#define SHELL_PRS_SIZE 64;
+#define SHELL_PRS_DELIM " \t\r\n\a";
+char **shell_parse_line(char *line){
+  
+}
 
 
