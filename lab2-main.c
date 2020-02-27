@@ -38,7 +38,7 @@ int shell_cd(char **args){
 
 int shell_help(char **args){
   int i;
-  printf("Lab 2 Assignment: Jacob Torres and Jacob Barberena's Shell\n");
+  printf("Lab 2 Assignment by Jacob Torres and Jacob Barberena\n");
   printf("The following are built in:\n");
 
   for (i = 0; i < shell_num_builtins(); i++) {
@@ -166,7 +166,7 @@ void shell_loop(){
   int run_args;
 
   do{
-    printf("$ >> ");
+    printf("$ ");
     
     line = shell_read_line();
     parse_args = shell_parse_line(line);
