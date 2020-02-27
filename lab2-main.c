@@ -25,7 +25,7 @@ void shell_loop(){
   
 }
 
-#define SHELL_RL_SIZE 1024;
+#define SHELL_RL_SIZE 1024
 char *shell_read_line(void){
   int lnsize = SHELL_RL_SIZE;
   int start_pos = 0;
@@ -64,8 +64,8 @@ char *shell_read_line(void){
 }
 
 
-#define SHELL_PRS_SIZE 64;
-#define SHELL_PRS_DELIM " \t\r\n\a";
+#define SHELL_PRS_SIZE 64
+#define SHELL_PRS_DELIM " \t\r\n\a"
 char **shell_parse_line(char *line){
   int bufsize = SHELL_PRS_SIZE;
   int pos = 0;
