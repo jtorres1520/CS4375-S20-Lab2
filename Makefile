@@ -1,6 +1,6 @@
 
 main:	lab2-main.o
-	gcc lab_1_main.o -o output
+	gcc lab2-main.o -o output
 
 lab2-main.o: lab2-main.c
 	gcc -c lab2-main.c
