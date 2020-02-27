@@ -5,6 +5,57 @@
 #include <unistd.h>
 
 
+int shell_cd(char **args);
+int shell_help(char **args);
+int shell_exit(char **args);
+
+char *builtin_str[] = {
+  "cd",
+  "help",
+  "exit"
+};
+
+int (*builtin_func[]) (char **) = {
+  &shell_cd,
+  &shell_help,
+  &shell_exit
+};
+
+int shell_num_builtins() {
+  return sizeof(builtin_str) / sizeof(char *);
+}
+
+int shell_cd(char **args){
+  if (args[1] == NULL) {
+    fprintf(stderr, "shell: expected argument to \"cd\"\n");
+  } else {
+    if (chdir(args[1]) != 0) {
+      perror("shell");
+    }
+  }
+  return 1;
+}
+
+int shell_help(char **args){
+  int i;
+  printf("Lab 2 Assignment: Jacob Torres and Jacob Barberena's Shell\n");
+  printf("The following are built in:\n");
+
+  for (i = 0; i < shell_num_builtins(); i++) {
+    printf("  %s\n", builtin_str[i]);
+  }
+  return 1;
+}
+
+int shell_exit(char **args){
+  return 0;
+}
+
+
+
+
+
+
 int main(int argc, char **argv){
   shell_loop();   // will continue running shell on a loop
   return EXIT_SUCCESS;
@@ -17,14 +68,15 @@ void shell_loop(){
 
   do{
     printf("$ >> ");
+    
     line = shell_read_line();
-    parse_args = shell_parse_line();
-    run_args = shell_runCM();
+    parse_args = shell_parse_line(line);
+    run_args = shell_runCM(parse_args);
     
     free(line);
     free(run_args);
       
-  }while(status);
+  }while (run_args);
   
 }
 
@@ -123,8 +175,6 @@ int shell_launch(char **args){
   }
   return 1;
 }
-
-
 
 
 
