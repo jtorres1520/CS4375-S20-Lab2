@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 
 int main(int argc, char **argv){
   shell_loop();   // will continue running shell on a loop
@@ -72,7 +75,7 @@ char **shell_parse_line(char *line){
   char **tokens = malloc(bufsize * sizeof(char*));
   char *sgl_token;
   
-  if(!tokens = ){
+  if(!tokens){
     fprintf(stderr, "shell: allocation error");
     exit(EXIT_FAILURE);
   }
@@ -96,5 +99,33 @@ char **shell_parse_line(char *line){
   tokens[pos] = NULL;
   return tokens;
 }
+
+
+int shell_launch(char **args){
+  pid_t pid;
+  pid_t wpid;
+  int status;
+
+  pid = fork();
+  if(pid == 0){   // child process
+    if(execvp(args[0], args) == -1){
+      perror("shell");
+    }
+    exit(EXIT_FAILURE);
+  }
+  else if(pid < 0){
+    perror("shell");
+  }
+  else{   // parent process
+    do{
+      wpid = waitpid(pid, &status, WUNTRACED);
+    }while (!WIFEXITED(status) && !WIFSIGNALED(status));
+  }
+  return 1;
+}
+
+
+
+
 
 
