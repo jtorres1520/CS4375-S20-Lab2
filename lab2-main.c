@@ -64,30 +64,6 @@ int shell_runCM(char **args){
   return shell_launch(args);
 }
 
-int main(int argc, char **argv){
-  shell_loop();   // will continue running shell on a loop
-  return EXIT_SUCCESS;
-}
-
-void shell_loop(){
-  char *line;
-  char **parse_args;
-  int run_args;
-
-  do{
-    printf("$ >> ");
-    
-    line = shell_read_line();
-    parse_args = shell_parse_line(line);
-    run_args = shell_runCM(parse_args);
-    
-    free(line);
-    free(parse_args);
-      
-  }while (run_args);
-  
-}
-
 #define SHELL_RL_SIZE 1024
 char *shell_read_line(void){
   int lnsize = SHELL_RL_SIZE;
@@ -184,6 +160,26 @@ int shell_launch(char **args){
   return 1;
 }
 
+void shell_loop(){
+  char *line;
+  char **parse_args;
+  int run_args;
 
+  do{
+    printf("$ >> ");
+    
+    line = shell_read_line();
+    parse_args = shell_parse_line(line);
+    run_args = shell_runCM(parse_args);
+    
+    free(line);
+    free(parse_args);
+      
+  }while (run_args);
+  
+}
 
-
+int main(int argc, char **argv){
+  shell_loop();   // will continue running shell on a loop
+  return EXIT_SUCCESS;
+}
