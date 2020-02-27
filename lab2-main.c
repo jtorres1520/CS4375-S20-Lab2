@@ -67,7 +67,34 @@ char *shell_read_line(void){
 #define SHELL_PRS_SIZE 64;
 #define SHELL_PRS_DELIM " \t\r\n\a";
 char **shell_parse_line(char *line){
+  int bufsize = SHELL_PRS_SIZE;
+  int pos = 0;
+  char **tokens = malloc(bufsize * sizeof(char*));
+  char *sgl_token;
   
+  if(!tokens = ){
+    fprintf(stderr, "shell: allocation error");
+    exit(EXIT_FAILURE);
+  }
+
+  sgl_token = strtok(line, SHELL_PRS_DELIM);
+
+  while(sgl_token != NULL){
+    tokens[pos] = sgl_token;
+    pos++;
+    
+    if(pos >= bufsize){
+      bufsize += SHELL_PRS_SIZE;
+      tokens = realloc(tokens, bufsize * sizeof(char*));
+      if(!tokens){
+	fprintf(stderr, "shell: allocation error");
+	exit(EXIT_FAILURE);
+      }
+    }
+    sgl_token = strtok(NULL, SHELL_PRS_DELIM);
+  }
+  tokens[pos] = NULL;
+  return tokens;
 }
 
 
