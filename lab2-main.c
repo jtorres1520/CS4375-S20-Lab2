@@ -184,7 +184,7 @@ int ownCmdHandler(char** parsed)
   
     return 0; 
 } 
- /*
+
 // function for finding pipe 
 int parsePipe(char* str, char** strpiped) 
 { 
@@ -201,7 +201,7 @@ int parsePipe(char* str, char** strpiped)
         return 1; 
     } 
 } 
-  
+  /*
 // function for parsing command words 
 void parseSpace(char* str, char** parsed) 
 { 
