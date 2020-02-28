@@ -141,7 +141,7 @@ void openHelp()
   
     return; 
 } 
-/*
+
 // Function to execute builtin commands 
 int ownCmdHandler(char** parsed) 
 { 
@@ -184,7 +184,7 @@ int ownCmdHandler(char** parsed)
   
     return 0; 
 } 
- 
+ /*
 // function for finding pipe 
 int parsePipe(char* str, char** strpiped) 
 { 
