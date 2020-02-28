@@ -59,7 +59,7 @@ int shell_launch(char **args){
   pid = fork();
   if(pid == 0){   // child process
     if(execvp(args[0], args) == -1){
-      perror("shell");
+      perror("shell");   // "command not found" here
     }
     exit(EXIT_FAILURE);
   }
