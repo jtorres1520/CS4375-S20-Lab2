@@ -1,4 +1,87 @@
-#include <stdlib.h>
+#include<stdio.h> 
+#include<string.h> 
+#include<stdlib.h> 
+#include<unistd.h> 
+#include<sys/types.h> 
+#include<sys/wait.h> 
+
+#define clear() printf("\033[H\033[J") 
+#define MAXCOM 1000 // max number of letters to be supported 
+#define MAXLIST 100 // max number of commands to be supported 
+
+#define SHELL_RL_SIZE 1024
+char *shell_read_line(void){
+  int lnsize = SHELL_RL_SIZE;
+  int start_pos = 0;
+  char *buffer = malloc(sizeof(char) * lnsize);
+
+  if(!buffer){
+    fprintf(stderr, "shell: allocation error");
+    exit(EXIT_FAILURE);
+  }
+
+  int c;
+  while(1){
+    c = getchar();
+
+    if(c == EOF || c == '\n'){
+      buffer[start_pos] = '\0';
+      return buffer;
+    }
+    else{
+      buffer[start_pos] = c;
+    }
+    
+    start_pos++;
+
+    if(start_pos >= lnsize){
+      lnsize += SHELL_RL_SIZE;
+      buffer = realloc(buffer, lnsize);
+      
+      if(!buffer){
+	fprintf(stderr, "shell: allocation error");
+	exit(EXIT_FAILURE);
+      }
+    }
+    
+  }
+}
+
+// Function where the system command is executed 
+void execArgs(char** parsed) 
+{ 
+    // Forking a child 
+    pid_t pid = fork();  
+  
+    if (pid == -1) { 
+        printf("\nFailed forking child.."); 
+        return; 
+    } else if (pid == 0) { 
+        if (execvp(parsed[0], parsed) < 0) { 
+            printf("\nCould not execute command.."); 
+        } 
+        exit(0); 
+    } else { 
+        // waiting for child to terminate 
+        wait(NULL);  
+        return; 
+    } 
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -182,4 +265,4 @@ void shell_loop(){
 int main(int argc, char **argv){
   shell_loop();   // will continue running shell on a loop
   return EXIT_SUCCESS;
-}
+}*/
