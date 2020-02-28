@@ -239,7 +239,7 @@ int processString(char* str, char** parsed, char** parsedpipe)
     else
         return 1 + piped; 
 } 
-/*
+
 void shell_loop(){
   char *line;
   char **parse_args;
@@ -275,4 +275,4 @@ void shell_loop(){
 int main(int argc, char **argv){
   shell_loop();   // will continue running shell on a loop
   return EXIT_SUCCESS;
-}*/
+}
