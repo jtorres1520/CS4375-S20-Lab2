@@ -68,197 +68,207 @@ void execArgs(char** parsed)
     } 
 } 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-
-int shell_cd(char **args);
-int shell_help(char **args);
-int shell_exit(char **args);
-
-char *builtin_str[] = {
-  "cd",
-  "help",
-  "exit"
-};
-
-int (*builtin_func[]) (char **) = {
-  &shell_cd,
-  &shell_help,
-  &shell_exit
-};
-
-int shell_num_builtins() {
-  return sizeof(builtin_str) / sizeof(char *);
-}
-
-int shell_cd(char **args){
-  if (args[1] == NULL) {
-    fprintf(stderr, "shell: expected argument to \"cd\"\n");
-  } else {
-    if (chdir(args[1]) != 0) {
-      perror("shell");
-    }
-  }
-  return 1;
-}
-
-int shell_help(char **args){
-  int i;
-  printf("Lab 2 Assignment by Jacob Torres and Jacob Barberena\n");
-  printf("The following are built in:\n");
-
-  for (i = 0; i < shell_num_builtins(); i++) {
-    printf("  %s\n", builtin_str[i]);
-  }
-  return 1;
-}
-
-int shell_exit(char **args){
-  return 0;
-}
-
-int shell_launch(char **args){
-  pid_t pid;
-  pid_t wpid;
-  int status;
-
-  pid = fork();
-  if(pid == 0){   // child process
-    if(execvp(args[0], args) == -1){
-      perror("shell");   // "command not found" here
-    }
-    exit(EXIT_FAILURE);
-  }
-  else if(pid < 0){
-    perror("shell");
-  }
-  else{   // parent process
-    do{
-      wpid = waitpid(pid, &status, WUNTRACED);
-    }while (!WIFEXITED(status) && !WIFSIGNALED(status));
-  }
-  return 1;
-}
-
-int shell_runCM(char **args){
-  if(args[0] == NULL){   // empty command
-    return 1;
-  }
-
-  for(int i = 0; i < shell_num_builtins(); i++){
-    if(strcmp(args[0], builtin_str[i]) == 0){
-      return (*builtin_func[i])(args);
-    }
-  }
-  return shell_launch(args);
-}
-
-#define SHELL_RL_SIZE 1024
-char *shell_read_line(void){
-  int lnsize = SHELL_RL_SIZE;
-  int start_pos = 0;
-  char *buffer = malloc(sizeof(char) * lnsize);
-
-  if(!buffer){
-    fprintf(stderr, "shell: allocation error");
-    exit(EXIT_FAILURE);
-  }
-
-  int c;
-  while(1){
-    c = getchar();
-
-    if(c == EOF || c == '\n'){
-      buffer[start_pos] = '\0';
-      return buffer;
-    }
-    else{
-      buffer[start_pos] = c;
-    }
-    
-    start_pos++;
-
-    if(start_pos >= lnsize){
-      lnsize += SHELL_RL_SIZE;
-      buffer = realloc(buffer, lnsize);
-      
-      if(!buffer){
-	fprintf(stderr, "shell: allocation error");
-	exit(EXIT_FAILURE);
-      }
-    }
-    
-  }
-}
-
-
-#define SHELL_PRS_SIZE 64
-#define SHELL_PRS_DELIM " \t\r\n\a"
-char **shell_parse_line(char *line){
-  int bufsize = SHELL_PRS_SIZE;
-  int pos = 0;
-  char **tokens = malloc(bufsize * sizeof(char*));
-  char *sgl_token;
+// Function where the piped system commands is executed 
+void execArgsPiped(char** parsed, char** parsedpipe) 
+{ 
+    // 0 is read end, 1 is write end 
+    int pipefd[2];  
+    pid_t p1, p2; 
   
-  if(!tokens){
-    fprintf(stderr, "shell: allocation error");
-    exit(EXIT_FAILURE);
-  }
+    if (pipe(pipefd) < 0) { 
+        printf("\nPipe could not be initialized"); 
+        return; 
+    } 
+    p1 = fork(); 
+    if (p1 < 0) { 
+        printf("\nCould not fork"); 
+        return; 
+    } 
+  
+    if (p1 == 0) { 
+        // Child 1 executing.. 
+        // It only needs to write at the write end 
+        close(pipefd[0]); 
+        dup2(pipefd[1], STDOUT_FILENO); 
+        close(pipefd[1]); 
+  
+        if (execvp(parsed[0], parsed) < 0) { 
+            printf("\nCould not execute command 1..\n");
+            printf("%s", parsed[0]); 
+            exit(0); 
+        } 
+    } else { 
+        // Parent executing 
+        p2 = fork(); 
+  
+        if (p2 < 0) { 
+            printf("\nCould not fork"); 
+            return; 
+        } 
+  
+        // Child 2 executing.. 
+        // It only needs to read at the read end 
+        if (p2 == 0) { 
+            close(pipefd[1]); 
+            dup2(pipefd[0], STDIN_FILENO); 
+            close(pipefd[0]); 
+            if (execvp(parsedpipe[0], parsedpipe) < 0) { 
+                printf("\nCould not execute command 2..\n");
+                printf("%s\n", parsed[0]);  
+                exit(0); 
+            } 
+        } else { 
+            // parent executing, waiting for two children 
+            wait(NULL); 
+            wait(NULL); 
+        } 
+    } 
+} 
+  
+// Help command builtin 
+void openHelp() 
+{ 
+    puts("\n***WELCOME TO MY SHELL HELP***"
+        "\nCopyright @ Suprotik Dey"
+        "\n-Use the shell at your own risk..."
+        "\nList of Commands supported:"
+        "\n>cd"
+        "\n>ls"
+        "\n>exit"
+        "\n>all other general commands available in UNIX shell"
+        "\n>pipe handling"
+        "\n>improper space handling"); 
+  
+    return; 
+} 
+/*
+// Function to execute builtin commands 
+int ownCmdHandler(char** parsed) 
+{ 
+    int NoOfOwnCmds = 4, i, switchOwnArg = 0; 
+    char* ListOfOwnCmds[NoOfOwnCmds]; 
+    char* username; 
+  
+    ListOfOwnCmds[0] = "exit"; 
+    ListOfOwnCmds[1] = "cd"; 
+    ListOfOwnCmds[2] = "help"; 
+    ListOfOwnCmds[3] = "hello"; 
+  
+    for (i = 0; i < NoOfOwnCmds; i++) { 
+        if (strcmp(parsed[0], ListOfOwnCmds[i]) == 0) { 
+            switchOwnArg = i + 1; 
+            break; 
+        } 
+    } 
+  
+    switch (switchOwnArg) { 
+    case 1: 
+        printf("\nGoodbye\n"); 
+        exit(0); 
+    case 2: 
+        chdir(parsed[1]); 
+        return 1; 
+    case 3: 
+        openHelp(); 
+        return 1; 
+    case 4: 
+        username = getenv("USER"); 
+        printf("\nHello %s.\nMind that this is "
+            "not a place to play around."
+            "\nUse help to know more..\n", 
+            username); 
+        return 1; 
+    default: 
+        break; 
+    } 
+  
+    return 0; 
+} 
+ 
+// function for finding pipe 
+int parsePipe(char* str, char** strpiped) 
+{ 
+    int i; 
+    for (i = 0; i < 2; i++) { 
+        strpiped[i] = strsep(&str, "|"); 
+        if (strpiped[i] == NULL) 
+            break; 
+    } 
+  
+    if (strpiped[1] == NULL) 
+        return 0; // returns zero if no pipe is found. 
+    else { 
+        return 1; 
+    } 
+} 
+  
+// function for parsing command words 
+void parseSpace(char* str, char** parsed) 
+{ 
+    int i; 
+  
+    for (i = 0; i < MAXLIST; i++) { 
+        parsed[i] = strsep(&str, " "); 
+  
+        if (parsed[i] == NULL) 
+            break; 
+        if (strlen(parsed[i]) == 0) 
+            i--; 
+    } 
+} 
 
-  sgl_token = strtok(line, SHELL_PRS_DELIM);
-
-  while(sgl_token != NULL){
-    tokens[pos] = sgl_token;
-    pos++;
-    
-    if(pos >= bufsize){
-      bufsize += SHELL_PRS_SIZE;
-      tokens = realloc(tokens, bufsize * sizeof(char*));
-      if(!tokens){
-	fprintf(stderr, "shell: allocation error");
-	exit(EXIT_FAILURE);
-      }
-    }
-    sgl_token = strtok(NULL, SHELL_PRS_DELIM);
-  }
-  tokens[pos] = NULL;
-  return tokens;
-}
-
+int processString(char* str, char** parsed, char** parsedpipe) 
+{ 
+  
+    char* strpiped[2]; 
+    int piped = 0; 
+  
+    piped = parsePipe(str, strpiped); 
+  
+    if (piped) { 
+        parseSpace(strpiped[0], parsed); 
+        parseSpace(strpiped[1], parsedpipe); 
+  
+    } else { 
+  
+        parseSpace(str, parsed); 
+    } 
+  
+    if (ownCmdHandler(parsed)) 
+        return 0; 
+    else
+        return 1 + piped; 
+} 
 
 void shell_loop(){
   char *line;
   char **parse_args;
   int run_args;
 
+    char inputString[MAXCOM], *parsedArgs[MAXLIST]; 
+    char* parsedArgsPiped[MAXLIST]; 
+    int execFlag = 0; 
+
   do{
-    printf("$ ");
+    printf("$ >> ");
     
     line = shell_read_line();
-    parse_args = shell_parse_line(line);
-    run_args = shell_runCM(parse_args);
-    
-    free(line);
-    free(parse_args);
+    execFlag = processString(line, 
+    parsedArgs, parsedArgsPiped); 
+    // execflag returns zero if there is no command 
+    // or it is a builtin command, 
+    // 1 if it is a simple command 
+    // 2 if it is including a pipe. 
+
+    // execute 
+    if (execFlag == 1) {
+        execArgs(parsedArgs); 
+    }
+
+    if (execFlag == 2) 
+        execArgsPiped(parsedArgs, parsedArgsPiped); 
       
-  }while (run_args);
+  }while (1);
   
 }
 
