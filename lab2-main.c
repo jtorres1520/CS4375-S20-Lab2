@@ -201,7 +201,7 @@ int parsePipe(char* str, char** strpiped)
         return 1; 
     } 
 } 
-  /*
+
 // function for parsing command words 
 void parseSpace(char* str, char** parsed) 
 { 
@@ -216,7 +216,7 @@ void parseSpace(char* str, char** parsed)
             i--; 
     } 
 } 
-
+/*
 int processString(char* str, char** parsed, char** parsedpipe) 
 { 
   
