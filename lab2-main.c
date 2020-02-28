@@ -216,7 +216,7 @@ void parseSpace(char* str, char** parsed)
             i--; 
     } 
 } 
-/*
+
 int processString(char* str, char** parsed, char** parsedpipe) 
 { 
   
@@ -239,7 +239,7 @@ int processString(char* str, char** parsed, char** parsedpipe)
     else
         return 1 + piped; 
 } 
-
+/*
 void shell_loop(){
   char *line;
   char **parse_args;
